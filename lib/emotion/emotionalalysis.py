@@ -31,37 +31,37 @@ class EmotionAnalysis:
         positive_num = 0
         negative_num = 0
         for item in content:
-            if self.positive_dict.has_key(item):
+            print "item:", item
+            if self.positive_dict.has_key(item.encode('utf-8')):
                 positive_num += 1
-            if self.negative_dict.has_key(item):
-                negative_num += 1
-            print "result:", item, "下跌"
-            print self.negative_dict.has_key("下跌")
-            print self.negative_dict.has_key(item)
-            if item.encode('utf-8') == "下跌":
-                print "OKKK"
-            #print self.negative_dict["下跌"]
-            #print "item",item,positive_num, negative_num
-        if positive_num > negative_num:
-            return "看涨"
-        if positive_num < negative_num:
-            return "看跌"
-        return "中性"
+            if self.negative_dict.has_key(item.encode('utf-8')):
+                negative_num += 1 
+        tot = positive_num + negative_num
+        ret = ""
+        if tot > 0:
+            positive_ratio = positive_num * 1.0 / tot
+            print positive_ratio
+            if positive_ratio >= 0.6:
+                ret = "利多"
+            elif positive_ratio <= 0.4: 
+                ret = "利空"
+            else:
+                ret = "中性"
+        else:
+            ret = "中性"
+        return ret
+
 
 from flask import Flask,request  
-
 app = Flask(__name__)
 emotion_analysis = EmotionAnalysis()
 
 @app.route('/', methods=['GET','POST'])
 def process():
-    query = request.args.get("query","").encode('utf-8')
+    query = request.args.get("query","")
     content = []
     for item in query.split("/"):
         content.append(item.strip())
-    print "11"
-    print "ret:", emotion_analysis.process(content)
-    print "11"
     return emotion_analysis.process(content)
 
 if __name__ == "__main__":
